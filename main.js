@@ -1,14 +1,32 @@
-import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
 import "./style.css";
 import * as THREE from "three";
 import { Pane } from "tweakpane";
+import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass.js";
 
+//initialize the scene
 const scene = new THREE.Scene();
-const pane = new Pane();
 
-const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 const cubeMaterial = new THREE.MeshPhysicalMaterial();
 cubeMaterial.color = new THREE.Color("green");
+cubeMaterial.clearcoat = 1;
+
+const sphereGeometry = new THREE.SphereGeometry(0.6, 40, 40);
+const torusKnotGeometry = new THREE.TorusKnotGeometry(0.4, 0.15, 100, 16);
+const coneGeometry = new THREE.ConeGeometry(0.6, 1.2, 25);
+
+const sphereMesh = new THREE.Mesh(sphereGeometry, cubeMaterial);
+const torusKnotMesh = new THREE.Mesh(torusKnotGeometry, cubeMaterial);
+const coneMesh = new THREE.Mesh(coneGeometry, cubeMaterial);
+
+torusKnotMesh.position.x = 2;
+coneMesh.position.x = -4;
+
+scene.add(sphereMesh, torusKnotMesh, coneMesh);
+
+//initialize the pane
+const pane = new Pane();
+
 pane.addInput(cubeMaterial, "metalness", {
   min: 0,
   max: 1,
@@ -33,22 +51,22 @@ pane.addInput(cubeMaterial, "transparent", {
   options: { on: "true", off: "false" },
 });
 
-const torusKnotGeometry = new THREE.TorusKnotGeometry(0.5, 0.15, 100, 16);
+// const loader = new GLTFLoader();
+// loader.load(
+//   "pillow.gltf",
+//   function (gltf) {
+
+//     const model = gltf.scene;
+//     scene.add(model);
+//     model.position.set(0, -1, 0);
+//   }
+// );
 
 // const fog = new THREE.Fog(0xffffff, 1, 20);
 // scene.fog = fog;
-// scene.background = new THREE.Color(0xffffff);
+scene.background = new THREE.Color(0xeee1d4);
 
 //cubeMaterial.fog = false; set mesh to be affected by fog
-
-const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-const cubeMesh1 = new THREE.Mesh(torusKnotGeometry, cubeMaterial);
-const cubeMesh2 = new THREE.Mesh(cubeGeometry, cubeMaterial);
-
-cubeMesh1.position.x = 2;
-cubeMesh2.position.x = -2;
-
-scene.add(cubeMesh, cubeMesh1, cubeMesh2);
 
 const light = new THREE.AmbientLight(0xffffff, 2);
 scene.add(light);
