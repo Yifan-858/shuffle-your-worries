@@ -28,7 +28,7 @@ const coneMesh = new THREE.Mesh(coneGeometry, cubeMaterial);
 sphereMesh2 = new THREE.Mesh(sphereGeometry2, cubeMaterial);
 sphereMesh2.position.z = 0.8;
 sphereMesh.add(sphereMesh2);
-// scene.add(sphereMesh, torusKnotMesh, coneMesh);
+scene.add(sphereMesh, torusKnotMesh, coneMesh);
 
 //initialize the pane
 const pane = new Pane();
