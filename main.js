@@ -1,4 +1,5 @@
 import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
+
 import "./style.css";
 import * as THREE from "three";
 
@@ -9,6 +10,15 @@ let randomMesh;
 let rotatingMeshes = [];
 
 //add material
+const textureLoader = new THREE.TextureLoader();
+const colorTest = textureLoader.load("material/texture-map/Clay-color-map.jpg");
+const roughnessTest = textureLoader.load(
+  "material/texture-map/Clay-roughness-map.jpg"
+);
+const displaymentTest = textureLoader.load(
+  "material/texture-map/Clay-displayment-map.jpg"
+);
+
 const cubeMaterial = new THREE.MeshPhysicalMaterial();
 cubeMaterial.color = new THREE.Color(0xef5930);
 cubeMaterial.clearcoat = 1;
@@ -17,18 +27,32 @@ const faceMaterial = new THREE.MeshPhysicalMaterial();
 faceMaterial.color = new THREE.Color(0x000);
 faceMaterial.clearcoat = 1;
 
+const testMaterial = new THREE.MeshPhysicalMaterial();
+testMaterial.map = colorTest;
+testMaterial.roughnessMap = roughnessTest;
+testMaterial.displacementMap = displaymentTest;
+testMaterial.displacementScale = 0.3;
+
 //add head geometry
 const sphereGeometry = new THREE.SphereGeometry(0.6, 40, 40);
-const sphereMesh = new THREE.Mesh(sphereGeometry, cubeMaterial);
+const sphereMesh = new THREE.Mesh(sphereGeometry, testMaterial);
 
 const emojiGeometry = new THREE.SphereGeometry(0.3, 40, 40);
 let sphereMesh2 = new THREE.Mesh(emojiGeometry, faceMaterial);
 
 sphereMesh2.position.z = 0.8;
 
+const loader = new GLTFLoader();
+loader.load("clay.glb", function (glb) {
+  console.log(glb);
+  const model = glb.scene;
+  scene.add(model);
+  model.position.set(0, 0, 0);
+});
+
 //add emoji to face
 sphereMesh.add(sphereMesh2);
-scene.add(sphereMesh);
+// scene.add(sphereMesh);
 
 //add random geo to scene
 const plusButton = document.querySelector("#plus-button");
@@ -79,7 +103,7 @@ const camera = new THREE.PerspectiveCamera(
   30,
   window.innerWidth / window.innerHeight,
   0.1,
-  100
+  4000
 );
 
 camera.position.z = 15;
