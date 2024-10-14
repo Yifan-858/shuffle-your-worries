@@ -1,4 +1,8 @@
-import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
+import {
+  GLTFLoader,
+  OrbitControls,
+  DRACOLoader,
+} from "three/examples/jsm/Addons.js";
 
 import "./style.css";
 import * as THREE from "three";
@@ -42,17 +46,59 @@ let sphereMesh2 = new THREE.Mesh(emojiGeometry, faceMaterial);
 
 sphereMesh2.position.z = 0.8;
 
-const loader = new GLTFLoader();
-loader.load("clay.glb", function (glb) {
+//add loaders
+const gltfLoader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+
+dracoLoader.setDecoderPath("/draco/");
+gltfLoader.setDRACOLoader(dracoLoader);
+
+gltfLoader.load("head.glb", function (glb) {
   console.log(glb);
   const model = glb.scene;
   scene.add(model);
   model.position.set(0, 0, 0);
 });
 
+gltfLoader.load("though2.glb", function (glb) {
+  console.log(glb);
+  const model = glb.scene;
+  scene.add(model);
+  model.position.set(2, 0, 0);
+});
+
+gltfLoader.load("though1.glb", function (glb) {
+  console.log(glb);
+  const model = glb.scene;
+  scene.add(model);
+  model.position.set(-2, 0, 2);
+});
+gltfLoader.load("though3.glb", function (glb) {
+  console.log(glb);
+  const model = glb.scene;
+  scene.add(model);
+  model.position.set(-3, 0, 2);
+});
+gltfLoader.load("though4.glb", function (glb) {
+  console.log(glb);
+  const model = glb.scene;
+  scene.add(model);
+  model.position.set(3, 0, 2);
+});
+
+let thought5;
+gltfLoader.load("though5.glb", function (glb) {
+  thought5 = glb.scene;
+  scene.add(thought5);
+  thought5.position.set(2.5, 1, 2);
+});
+
 //add emoji to face
 sphereMesh.add(sphereMesh2);
 // scene.add(sphereMesh);
+
+const axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
 
 //add random geo to scene
 const plusButton = document.querySelector("#plus-button");
@@ -95,9 +141,21 @@ scene.background = new THREE.Color(0xeee1d4);
 const light = new THREE.AmbientLight(0xffffff, 2);
 scene.add(light);
 
-const pointLight = new THREE.PointLight(0xffffff, 100);
-pointLight.position.set(5, 5, 1);
+const pointLight = new THREE.PointLight(0xf7bc97, 100);
+pointLight.position.set(4, 2, 2);
 scene.add(pointLight);
+
+// const sphereSize = 1;
+// const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
+// scene.add(pointLightHelper);
+
+const pointLight2 = new THREE.PointLight(0x97dff7, 80);
+pointLight2.position.set(-4, 2, 2);
+scene.add(pointLight2);
+
+// const sphereSize2 = 1;
+// const pointLightHelper2 = new THREE.PointLightHelper(pointLight2, sphereSize2);
+// scene.add(pointLightHelper2);
 
 const camera = new THREE.PerspectiveCamera(
   30,
@@ -106,7 +164,7 @@ const camera = new THREE.PerspectiveCamera(
   4000
 );
 
-camera.position.z = 15;
+camera.position.z = 10;
 
 //get html element
 const canvas = document.querySelector("canvas.threejs");
@@ -140,6 +198,12 @@ const renderloop = () => {
 
   if (rotatingMeshes.length >= 2) {
     faceMaterial.color.set(0x456456);
+  }
+
+  if (thought5) {
+    thought5.rotation.y += 0.01;
+    thought5.position.x = Math.sin(thought5.rotation.y) * 2;
+    thought5.position.z = Math.cos(thought5.rotation.y) * 2;
   }
 
   controls.update(); // for controls.enableDamping
