@@ -10,41 +10,34 @@ import * as THREE from "three";
 //initialize the scene
 const scene = new THREE.Scene();
 
-let randomMesh;
-let rotatingMeshes = [];
+//add background color
+scene.background = new THREE.Color(0xeee1d4);
 
-//add material
-const textureLoader = new THREE.TextureLoader();
-const colorTest = textureLoader.load("material/texture-map/Clay-color-map.jpg");
-const roughnessTest = textureLoader.load(
-  "material/texture-map/Clay-roughness-map.jpg"
+//add lights
+const light = new THREE.AmbientLight(0xffffff, 2);
+scene.add(light);
+
+const pointLight = new THREE.PointLight(0xf7bc97, 100);
+pointLight.position.set(4, 2, 2);
+scene.add(pointLight);
+
+const pointLight2 = new THREE.PointLight(0x97dff7, 80);
+pointLight2.position.set(-4, 2, 2);
+scene.add(pointLight2);
+
+//add camera
+const camera = new THREE.PerspectiveCamera(
+  30,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  4000
 );
-const displaymentTest = textureLoader.load(
-  "material/texture-map/Clay-displayment-map.jpg"
-);
 
-const cubeMaterial = new THREE.MeshPhysicalMaterial();
-cubeMaterial.color = new THREE.Color(0xef5930);
-cubeMaterial.clearcoat = 1;
+camera.position.z = 10;
 
-const faceMaterial = new THREE.MeshPhysicalMaterial();
-faceMaterial.color = new THREE.Color(0x000);
-faceMaterial.clearcoat = 1;
-
-const testMaterial = new THREE.MeshPhysicalMaterial();
-testMaterial.map = colorTest;
-testMaterial.roughnessMap = roughnessTest;
-testMaterial.displacementMap = displaymentTest;
-testMaterial.displacementScale = 0.3;
-
-//add head geometry
-const sphereGeometry = new THREE.SphereGeometry(0.6, 40, 40);
-const sphereMesh = new THREE.Mesh(sphereGeometry, testMaterial);
-
-const emojiGeometry = new THREE.SphereGeometry(0.3, 40, 40);
-let sphereMesh2 = new THREE.Mesh(emojiGeometry, faceMaterial);
-
-sphereMesh2.position.z = 0.8;
+//add axeshelper
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 //add loaders
 const gltfLoader = new GLTFLoader();
@@ -54,73 +47,44 @@ dracoLoader.setDecoderPath("/draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 
 gltfLoader.load("head.glb", function (glb) {
-  console.log(glb);
   const model = glb.scene;
   scene.add(model);
   model.position.set(0, 0, 0);
 });
 
-gltfLoader.load("though2.glb", function (glb) {
-  console.log(glb);
-  const model = glb.scene;
-  scene.add(model);
-  model.position.set(2, 0, 0);
-});
-
-gltfLoader.load("though1.glb", function (glb) {
-  console.log(glb);
-  const model = glb.scene;
-  scene.add(model);
-  model.position.set(-2, 0, 2);
-});
-gltfLoader.load("though3.glb", function (glb) {
-  console.log(glb);
-  const model = glb.scene;
-  scene.add(model);
-  model.position.set(-3, 0, 2);
-});
-gltfLoader.load("though4.glb", function (glb) {
-  console.log(glb);
-  const model = glb.scene;
-  scene.add(model);
-  model.position.set(3, 0, 2);
-});
-
-let thought5;
-gltfLoader.load("though5.glb", function (glb) {
-  thought5 = glb.scene;
-  scene.add(thought5);
-  thought5.position.set(2.5, 1, 2);
-});
-
-//add emoji to face
-sphereMesh.add(sphereMesh2);
-// scene.add(sphereMesh);
-
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
-
 //add random geo to scene
+let thoughtMesh;
+let rotatingMeshes = [];
+
+const addRandomMesh = () => {
+  const gltfPaths = [
+    "though1.glb",
+    "though2.glb",
+    "though3.glb",
+    "though4.glb",
+    "though5.glb",
+  ];
+
+  const i = Math.floor(Math.random() * gltfPaths.length);
+  const selectedGltf = gltfPaths[i];
+
+  gltfLoader.load(selectedGltf, function (glb) {
+    thoughtMesh = glb.scene;
+    scene.add(thoughtMesh);
+    rotatingMeshes.push(thoughtMesh);
+  });
+};
+
+//get html element
+const canvas = document.querySelector("canvas.threejs");
 const plusButton = document.querySelector("#plus-button");
 const inputText = document.querySelector("#input-text");
 
-const addRandomMesh = () => {
-  const randomMeshArr = [
-    new THREE.Mesh(
-      new THREE.TorusKnotGeometry(0.4, 0.15, 100, 16),
-      cubeMaterial
-    ),
-    new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 25), cubeMaterial),
-    new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.2, 20), cubeMaterial),
-  ];
-  const i = Math.floor(Math.random() * 3);
-  randomMesh = randomMeshArr[i];
-  scene.add(randomMesh);
+//add control
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; //call .update () in render loop
 
-  rotatingMeshes.push(randomMesh);
-  console.log(rotatingMeshes);
-};
-
+//add functions and UI
 const handleClick = () => {
   if (inputText.value.trim() === "") {
     inputText.classList.add("error");
@@ -136,47 +100,11 @@ const handleClick = () => {
 
 plusButton.addEventListener("click", handleClick);
 
-scene.background = new THREE.Color(0xeee1d4);
-
-const light = new THREE.AmbientLight(0xffffff, 2);
-scene.add(light);
-
-const pointLight = new THREE.PointLight(0xf7bc97, 100);
-pointLight.position.set(4, 2, 2);
-scene.add(pointLight);
-
-// const sphereSize = 1;
-// const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
-// scene.add(pointLightHelper);
-
-const pointLight2 = new THREE.PointLight(0x97dff7, 80);
-pointLight2.position.set(-4, 2, 2);
-scene.add(pointLight2);
-
-// const sphereSize2 = 1;
-// const pointLightHelper2 = new THREE.PointLightHelper(pointLight2, sphereSize2);
-// scene.add(pointLightHelper2);
-
-const camera = new THREE.PerspectiveCamera(
-  30,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  4000
-);
-
-camera.position.z = 10;
-
-//get html element
-const canvas = document.querySelector("canvas.threejs");
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 
 //make the image smooth
 const maxPixelRatico = Math.min(window.devicePixelRatio, 2);
 renderer.setPixelRatio(maxPixelRatico);
-
-//add control
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; //call .update () in render loop
 
 //initiate render size
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -189,22 +117,16 @@ window.addEventListener("resize", () => {
 });
 
 const renderloop = () => {
-  rotatingMeshes.forEach((mesh, index) => {
+  rotatingMeshes.forEach((mesh) => {
+    mesh.position.y = 1;
     mesh.rotation.y += 0.01;
-
-    mesh.position.x = Math.sin(mesh.rotation.y) * (2 + index);
-    mesh.position.z = Math.cos(mesh.rotation.y) * (2 + index);
+    mesh.position.x = Math.sin(mesh.rotation.y) * 2;
+    mesh.position.z = Math.cos(mesh.rotation.y) * 2;
   });
 
-  if (rotatingMeshes.length >= 2) {
-    faceMaterial.color.set(0x456456);
-  }
-
-  if (thought5) {
-    thought5.rotation.y += 0.01;
-    thought5.position.x = Math.sin(thought5.rotation.y) * 2;
-    thought5.position.z = Math.cos(thought5.rotation.y) * 2;
-  }
+  // if (rotatingMeshes.length >= 2) {
+  //   faceMaterial.color.set(0x456456);
+  // }
 
   controls.update(); // for controls.enableDamping
   renderer.render(scene, camera);
