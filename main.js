@@ -75,6 +75,40 @@ const addRandomMesh = () => {
   });
 };
 
+//add face expression
+let selectedFace;
+const facePath = ["face1.glb", "face2.glb", "face3.glb"];
+let currentFacePath = facePath[0];
+let currentFaceMesh = null;
+
+gltfLoader.load(currentFacePath, function (glb) {
+  currentFaceMesh = glb.scene;
+  scene.add(currentFaceMesh);
+  currentFaceMesh.position.set(0.045, 0, 0);
+});
+
+const updateFace = () => {
+  if (rotatingMeshes.length >= 0 && rotatingMeshes.length <= 1) {
+    selectedFace = facePath[0];
+  } else if (rotatingMeshes.length > 1 && rotatingMeshes.length <= 5) {
+    selectedFace = facePath[1];
+  } else {
+    selectedFace = facePath[2];
+  }
+
+  if (currentFacePath !== selectedFace) {
+    scene.remove(currentFaceMesh);
+    currentFaceMesh = null;
+    gltfLoader.load(selectedFace, function (glb) {
+      currentFaceMesh = glb.scene;
+      scene.add(currentFaceMesh);
+      currentFaceMesh.position.set(0.045, 0, 0);
+    });
+    currentFacePath = selectedFace;
+    console.log("reload");
+  }
+};
+
 //get html element
 const canvas = document.querySelector("canvas.threejs");
 const plusButton = document.querySelector("#plus-button");
@@ -96,6 +130,7 @@ const handleClick = () => {
 
   inputText.value = "";
   addRandomMesh();
+  updateFace();
 };
 
 plusButton.addEventListener("click", handleClick);
@@ -123,10 +158,6 @@ const renderloop = () => {
     mesh.position.x = Math.sin(mesh.rotation.y) * 2;
     mesh.position.z = Math.cos(mesh.rotation.y) * 2;
   });
-
-  // if (rotatingMeshes.length >= 2) {
-  //   faceMaterial.color.set(0x456456);
-  // }
 
   controls.update(); // for controls.enableDamping
   renderer.render(scene, camera);
