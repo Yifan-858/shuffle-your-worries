@@ -80,6 +80,7 @@ let selectedFace;
 const facePath = ["face1.glb", "face2.glb", "face3.glb"];
 let currentFacePath = facePath[0];
 let currentFaceMesh = null;
+let preloadedFaces = {};
 
 gltfLoader.load(currentFacePath, function (glb) {
   currentFaceMesh = glb.scene;
@@ -87,6 +88,15 @@ gltfLoader.load(currentFacePath, function (glb) {
   currentFaceMesh.position.set(0.045, 0, 0);
 });
 
+const preloadFaces = () => {
+  facePath.forEach((path) => {
+    gltfLoader.load(path, function (glb) {
+      preloadedFaces[path] = glb.scene; // Save the loaded scene
+    });
+  });
+};
+
+preloadFaces();
 const updateFace = () => {
   if (rotatingMeshes.length >= 0 && rotatingMeshes.length <= 1) {
     selectedFace = facePath[0];
@@ -99,11 +109,11 @@ const updateFace = () => {
   if (currentFacePath !== selectedFace) {
     scene.remove(currentFaceMesh);
     currentFaceMesh = null;
-    gltfLoader.load(selectedFace, function (glb) {
-      currentFaceMesh = glb.scene;
-      scene.add(currentFaceMesh);
-      currentFaceMesh.position.set(0.045, 0, 0);
-    });
+
+    currentFaceMesh = preloadedFaces[selectedFace].clone(); // Clone to avoid sharing
+    scene.add(currentFaceMesh);
+    currentFaceMesh.position.set(0.045, 0, 0);
+
     currentFacePath = selectedFace;
     console.log("reload");
   }
