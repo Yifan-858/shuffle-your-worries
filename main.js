@@ -34,6 +34,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 camera.position.z = 10;
+camera.position.y = 3;
 
 //add axeshelper
 // const axesHelper = new THREE.AxesHelper(5);
