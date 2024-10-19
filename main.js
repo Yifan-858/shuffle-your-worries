@@ -14,7 +14,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xeee1d4);
 
 //add lights
-const light = new THREE.AmbientLight(0xffffff, 2);
+const light = new THREE.AmbientLight(0xffffff, 1);
 scene.add(light);
 
 const pointLight = new THREE.PointLight(0xf7bc97, 100);
@@ -33,8 +33,8 @@ const camera = new THREE.PerspectiveCamera(
   4000
 );
 
-camera.position.z = 10;
-camera.position.y = 3;
+camera.position.z = 15;
+camera.position.y = -3;
 
 //add axeshelper
 // const axesHelper = new THREE.AxesHelper(5);
@@ -50,7 +50,7 @@ gltfLoader.setDRACOLoader(dracoLoader);
 gltfLoader.load("head.glb", function (glb) {
   const model = glb.scene;
   scene.add(model);
-  model.position.set(0, 0, 0);
+  model.position.set(0, -1, 0);
 });
 
 //add random geo to scene
@@ -76,6 +76,22 @@ const addRandomMesh = () => {
   });
 };
 
+//add orbit lines
+
+const orbitMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  side: THREE.DoubleSide,
+});
+
+const addOrbitLines = (orbitRadius) => {
+  const orbitThickness = orbitRadius - 0.01;
+  const orbitGeo = new THREE.RingGeometry(orbitRadius, orbitThickness, 90);
+  const orbitLineMesh = new THREE.Mesh(orbitGeo, orbitMaterial);
+  orbitLineMesh.rotation.x = Math.PI / 2;
+
+  scene.add(orbitLineMesh);
+};
+
 //add face expression
 let selectedFace;
 const facePath = ["face1.glb", "face2.glb", "face3.glb"];
@@ -86,7 +102,7 @@ let preloadedFaces = {};
 gltfLoader.load(currentFacePath, function (glb) {
   currentFaceMesh = glb.scene;
   scene.add(currentFaceMesh);
-  currentFaceMesh.position.set(0.045, 0, 0);
+  currentFaceMesh.position.set(0.045, -1, 0);
 });
 
 const preloadFaces = () => {
@@ -113,7 +129,7 @@ const updateFace = () => {
 
     currentFaceMesh = preloadedFaces[selectedFace].clone(); // Clone to avoid sharing
     scene.add(currentFaceMesh);
-    currentFaceMesh.position.set(0.045, 0, 0);
+    currentFaceMesh.position.set(0.045, -1, 0);
 
     currentFacePath = selectedFace;
     console.log("reload");
@@ -141,6 +157,8 @@ const handleClick = () => {
 
   inputText.value = "";
   addRandomMesh();
+
+  addOrbitLines(rotatingMeshes.length / 2 + 2);
   updateFace();
 };
 
@@ -163,11 +181,12 @@ window.addEventListener("resize", () => {
 });
 
 const renderloop = () => {
-  rotatingMeshes.forEach((mesh) => {
-    mesh.position.y = 1;
-    mesh.rotation.y += 0.01;
-    mesh.position.x = Math.sin(mesh.rotation.y) * 2;
-    mesh.position.z = Math.cos(mesh.rotation.y) * 2;
+  rotatingMeshes.forEach((mesh, index) => {
+    //speed
+    mesh.rotation.y += 0.005;
+    //radius
+    mesh.position.x = Math.sin(mesh.rotation.y) * (2 + index / 2);
+    mesh.position.z = Math.cos(mesh.rotation.y) * (2 + index / 2);
   });
 
   controls.update(); // for controls.enableDamping
