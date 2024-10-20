@@ -160,7 +160,6 @@ const updateFace = () => {
     currentFaceMesh.position.set(0.045, -1, 0);
 
     currentFacePath = selectedFace;
-    console.log("reload");
   }
 };
 
