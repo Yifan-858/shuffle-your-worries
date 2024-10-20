@@ -3,13 +3,17 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shuffle my worries</title>
+  <title>Shuffle your worry</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="stylesheet" href="style.css">
   <script type="module" src="/main.js" defer></script>
 </head>
 
 <body>
+  <div id="loading-screen">
+    <canvas id="dotlottie-canvas" style="width: 300px; height: 300px;"></canvas>
+  </div>
   <div class="input-container">
     <p>Enter your worry</p>
     <input type="text" id="input-text" required>

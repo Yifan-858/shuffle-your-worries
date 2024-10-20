@@ -9,6 +9,17 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+#loading-screen {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: #eee1d4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
 .input-container {
   position: absolute;
   bottom: 20px;

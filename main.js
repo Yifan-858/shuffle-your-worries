@@ -4,8 +4,15 @@ import {
   DRACOLoader,
 } from "three/examples/jsm/Addons.js";
 
-import "./style.css";
 import * as THREE from "three";
+import { DotLottie } from "@lottiefiles/dotlottie-web";
+
+const dotLottie = new DotLottie({
+  autoplay: true,
+  loop: true,
+  canvas: document.querySelector("#dotlottie-canvas"),
+  src: "loading.json", // replace with your .lottie or .json file URL
+});
 
 //initialize the scene
 const scene = new THREE.Scene();
@@ -40,8 +47,21 @@ camera.position.y = -3;
 // const axesHelper = new THREE.AxesHelper(5);
 // scene.add(axesHelper);
 
+//add loading manager for the loading page
+const loadingManager = new THREE.LoadingManager(
+  // when everything is loaded
+  () => {
+    const loadingScreen = document.getElementById("loading-screen");
+    loadingScreen.style.display = "none";
+  }
+
+  // (itemsLoaded, itemsTotal) => {
+  //   console.log(`${itemsLoaded}/${itemsTotal} items loaded.`);
+  // }
+);
+
 //add loaders
-const gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader(loadingManager);
 const dracoLoader = new DRACOLoader();
 
 dracoLoader.setDecoderPath("/draco/");
@@ -56,6 +76,7 @@ gltfLoader.load("head.glb", function (glb) {
 //add random geo to scene
 let thoughtMesh;
 let rotatingMeshes = [];
+let previousIndes = -1;
 
 const addRandomMesh = () => {
   const gltfPaths = [
@@ -66,7 +87,14 @@ const addRandomMesh = () => {
     "though5.glb",
   ];
 
-  const i = Math.floor(Math.random() * gltfPaths.length);
+  let i;
+
+  do {
+    i = Math.floor(Math.random() * gltfPaths.length);
+  } while (i === previousIndes);
+
+  previousIndes = i;
+
   const selectedGltf = gltfPaths[i];
 
   gltfLoader.load(selectedGltf, function (glb) {
@@ -183,7 +211,7 @@ window.addEventListener("resize", () => {
 const renderloop = () => {
   rotatingMeshes.forEach((mesh, index) => {
     //speed
-    mesh.rotation.y += 0.005;
+    mesh.rotation.y -= 0.005;
     //radius
     mesh.position.x = Math.sin(mesh.rotation.y) * (2 + index / 2);
     mesh.position.z = Math.cos(mesh.rotation.y) * (2 + index / 2);
