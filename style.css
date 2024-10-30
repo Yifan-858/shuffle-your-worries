@@ -47,3 +47,13 @@ input {
 .error {
   border-color: red; /* Red border for error state */
 }
+
+@media screen and (max-width: 768px) {
+  .input-container {
+    flex-direction: column;
+  }
+
+  .input-text {
+    margin-bottom: 10px;
+  }
+}
