@@ -8,6 +8,12 @@
 
 Everyone can feel pressure and worry during these uncertain times, with so much going on in the outside world. I thought: Why not turn this “mind swirl” into a web app to help people untangle their inner world of overloaded thoughts—and maybe even have a laugh about it?
 
+## Live Demo
+
+https://shuffle-your-worries.netlify.app/
+<br>
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f78472f5-ddcb-400f-a08a-6204a53c3bb3/deploy-status)](https://app.netlify.com/sites/shuffle-your-worries/deploys)
+
 ## Built With
 
 With my background and passion in 3D modeling and web development, I’m using Three.js to implement interactive 3D visualizations that bring this concept to life.
