@@ -63,7 +63,7 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("/draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 
-gltfLoader.load("flower.glb", function (glb) {
+gltfLoader.load("head.glb", function (glb) {
   const model = glb.scene;
   scene.add(model);
   model.position.set(0, -1, 0);
