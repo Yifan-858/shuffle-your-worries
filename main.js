@@ -54,10 +54,6 @@ const loadingManager = new THREE.LoadingManager(
     const loadingScreen = document.getElementById("loading-screen");
     loadingScreen.style.display = "none";
   }
-
-  // (itemsLoaded, itemsTotal) => {
-  //   console.log(`${itemsLoaded}/${itemsTotal} items loaded.`);
-  // }
 );
 
 //add loaders
@@ -67,7 +63,7 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("/draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 
-gltfLoader.load("head.glb", function (glb) {
+gltfLoader.load("flower.glb", function (glb) {
   const model = glb.scene;
   scene.add(model);
   model.position.set(0, -1, 0);
