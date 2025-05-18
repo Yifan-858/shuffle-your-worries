@@ -3,15 +3,16 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 type CanvasProps = {
-  thoughtModels: THREE.Object3D[];
+  thoughtModels?: THREE.Object3D[];
+  faceModel?: THREE.Object3D;
+  headModel?: THREE.Object3D;
 };
 
-const Canvas = ({ thoughtModels }: CanvasProps) => {
+const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    console.log("in canvas, thoughtModels before foreach:", thoughtModels);
 
     // add scene
     const scene = new THREE.Scene();
@@ -57,16 +58,29 @@ const Canvas = ({ thoughtModels }: CanvasProps) => {
     controls.rotateSpeed = 0.5; // control mouse movement lower = drag rotation
     //controls.target.set(0, 0, 0); // Adjust this based on models' center
 
+    //add head
+    if (headModel) {
+      scene.add(headModel);
+      headModel.position.set(0, -1, 0);
+    }
+
+    //add face
+    if (faceModel) {
+      scene.add(faceModel);
+      faceModel.position.set(0.045, -1, 0);
+    }
+    //add thoughts
     const rotatingThoughts: THREE.Object3D[] = [];
     //pass thoughtList to modified gltfLoader and extract the 3D model object
+    if (thoughtModels) {
+      thoughtModels.forEach((model, i) => {
+        model.position.x = Math.sin(i) * 3;
+        model.position.z = Math.cos(i) * 3;
+        scene.add(model);
+        rotatingThoughts.push(model);
+      });
+    }
 
-    thoughtModels.forEach((model, i) => {
-      model.position.x = Math.sin(i) * 3;
-      model.position.z = Math.cos(i) * 3;
-      scene.add(model);
-      rotatingThoughts.push(model);
-    });
-    console.log("in canvas, thoughtModels after foreach:", thoughtModels);
     //window event, spare the resizing being called every frame
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -93,9 +107,9 @@ const Canvas = ({ thoughtModels }: CanvasProps) => {
       window.removeEventListener("resize", onResize);
       renderer.dispose();
     };
-  }, [thoughtModels]);
+  }, [thoughtModels, faceModel, headModel]);
 
-  return <canvas ref={canvasRef} className="threejs" />;
+  return <canvas ref={canvasRef} className="threejs-canvas" />;
 };
 
 export default Canvas;

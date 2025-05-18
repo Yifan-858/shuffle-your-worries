@@ -4,8 +4,8 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import * as THREE from "three";
 
 export const gltfLoader = async (
-  //take modelUrl array, resuable for both Thoughts and Face
-  modelsUrls: string[]
+  //take modelUrl string/array, resuable for both Thoughts, FaceExperssions and Head
+  modelUrls: string | string[]
 ): Promise<THREE.Object3D[]> => {
   //add Three GLTFLoader
   const loader = new GLTFLoader();
@@ -25,7 +25,11 @@ export const gltfLoader = async (
     });
   };
 
-  const models = await Promise.all(modelsUrls.map((url) => loadModel(url)));
-
-  return models;
+  if (Array.isArray(modelUrls)) {
+    const models = await Promise.all(modelUrls.map((url) => loadModel(url)));
+    return models;
+  } else {
+    const model = await loadModel(modelUrls);
+    return [model]; // keep the return type as array
+  }
 };

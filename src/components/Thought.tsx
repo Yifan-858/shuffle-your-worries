@@ -28,4 +28,18 @@ export const thoughtList: Thought[] = [
     orbitIndex: 3,
     createdAt: "003",
   },
+  {
+    id: "4",
+    description: "hi",
+    modelUrl: "/thought4.glb",
+    orbitIndex: 4,
+    createdAt: "004",
+  },
+  {
+    id: "5",
+    description: "hi",
+    modelUrl: "/thought5.glb",
+    orbitIndex: 5,
+    createdAt: "005",
+  },
 ];
