@@ -1,18 +1,17 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { thoughtList } from "./Thought";
-import { gltfLoader } from "../utils/gltfLoader";
 
 type CanvasProps = {
-  models: THREE.Object3D[];
+  thoughtModels: THREE.Object3D[];
 };
 
-const Canvas = ({ models }: CanvasProps) => {
+const Canvas = ({ thoughtModels }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
+    console.log("in canvas, thoughtModels before foreach:", thoughtModels);
 
     // add scene
     const scene = new THREE.Scene();
@@ -45,28 +44,29 @@ const Canvas = ({ models }: CanvasProps) => {
       canvas: canvasRef.current,
       antialias: true,
     });
-
     //make the image smooth
     const maxPixelRatico = Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(maxPixelRatico);
     //initiate render size
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    //add control
+    //add (mouse) control
     const controls = new OrbitControls(camera, canvasRef.current);
     controls.enableDamping = true; //call .update () in render loop
+    controls.dampingFactor = 0.1; // control mouse movement lower = smoother/slower movement
+    controls.rotateSpeed = 0.5; // control mouse movement lower = drag rotation
+    //controls.target.set(0, 0, 0); // Adjust this based on models' center
 
-    const rotatingMeshes = [...models];
+    const rotatingThoughts: THREE.Object3D[] = [];
+    //pass thoughtList to modified gltfLoader and extract the 3D model object
 
-    gltfLoader(thoughtList).then((models) => {
-      models.forEach((model, i) => {
-        model.position.x = Math.sin(i) * 3;
-        model.position.z = Math.cos(i) * 3;
-        scene.add(model);
-        rotatingMeshes.push(model);
-      });
+    thoughtModels.forEach((model, i) => {
+      model.position.x = Math.sin(i) * 3;
+      model.position.z = Math.cos(i) * 3;
+      scene.add(model);
+      rotatingThoughts.push(model);
     });
-
+    console.log("in canvas, thoughtModels after foreach:", thoughtModels);
     //window event, spare the resizing being called every frame
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -77,9 +77,9 @@ const Canvas = ({ models }: CanvasProps) => {
 
     const animate = () => {
       requestAnimationFrame(animate);
-
-      rotatingMeshes.forEach((mesh) => {
-        mesh.rotation.y += 0.01;
+      //add self rotation to the Thoughts
+      rotatingThoughts.forEach((model) => {
+        model.rotation.y += 0.01;
       });
 
       controls.update();
@@ -93,7 +93,7 @@ const Canvas = ({ models }: CanvasProps) => {
       window.removeEventListener("resize", onResize);
       renderer.dispose();
     };
-  }, []);
+  }, [thoughtModels]);
 
   return <canvas ref={canvasRef} className="threejs" />;
 };
