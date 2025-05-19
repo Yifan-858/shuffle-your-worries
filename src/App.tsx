@@ -4,10 +4,8 @@ import { gltfLoader } from "./utils/gltfLoader.js";
 import * as THREE from "three";
 import { useAppStore } from "./stores/useAppStore.js";
 
-// const faceUrls: string[] = ["/face1.glb", "/face2.glb", "/face3.glb"];
-
 function App() {
-  const { addThoughtFromInput, thoughtModels } = useAppStore();
+  const { loadAndStoreFaceModels, addThoughtFromInput } = useAppStore();
   const [headModel, setHeadModel] = useState<THREE.Object3D>();
   const [input, setInput] = useState("");
   // const [faceArray, setFacrArray] = useState<THREE.Object3D[]>([]);
@@ -19,14 +17,12 @@ function App() {
       const loadHeadModel = await gltfLoader("/head.glb");
       const headModel = loadHeadModel[0]; //process the gltfLoader return which is an array type
       // const faces = await gltfLoader(faceUrls);
-      // const thoughtUrls = thoughtList.map((thought) => thought.modelUrl);
-      // const thoughts = await gltfLoader(thoughtUrls);
 
       setHeadModel(headModel);
-      // setThoughtModels(thoughts);
       // setFacrArray(faces);
     };
     preLoadModels();
+    loadAndStoreFaceModels();
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,13 +36,7 @@ function App() {
   return (
     <>
       <div>
-        {headModel && (
-          <Canvas
-            thoughtModels={thoughtModels}
-            // faceModel={faceModel}
-            headModel={headModel}
-          />
-        )}
+        {headModel && <Canvas headModel={headModel} />}
         <form className="inputContainer" onSubmit={handleSubmit}>
           <input
             type="text"

@@ -4,19 +4,22 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { useAppStore } from "../stores/useAppStore";
 
 type CanvasProps = {
-  thoughtModels?: THREE.Object3D[];
-  faceModel?: THREE.Object3D;
   headModel?: THREE.Object3D;
 };
 
-const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
+const Canvas = ({ headModel }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const orbitLines = useAppStore((state) => state.orbitLines);
   const sceneRef = useRef<THREE.Scene>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const controlsRef = useRef<OrbitControls>(null);
   const rendererRef = useRef<THREE.WebGLRenderer>(null);
   const rotatingThoughts = useRef<THREE.Object3D[]>([]);
+
+  const thoughtModels = useAppStore((state) => state.thoughtModels);
+  const orbitLines = useAppStore((state) => state.orbitLines);
+  const selectedFace = useAppStore((state) => state.selectedFace);
+  const currentFace = useAppStore((state) => state.currentFace);
+  const setCurrentFace = useAppStore((state) => state.setCurrentFace);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -121,9 +124,18 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
     });
 
     //add face
-    if (faceModel) {
-      scene.add(faceModel);
-      faceModel.position.set(0.045, -1, 0);
+    if (selectedFace) {
+      if (!currentFace || currentFace.uuid !== selectedFace.uuid) {
+        // remove old face if it exists
+        if (currentFace) scene.remove(currentFace);
+
+        // clone and add new face
+        const newFace = selectedFace.clone();
+        newFace.position.set(0.045, -1, 0);
+        scene.add(newFace);
+
+        setCurrentFace(newFace);
+      }
     }
     //add thoughts
 
@@ -134,7 +146,7 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
         rotatingThoughts.current.push(model);
       });
     }
-  }, [thoughtModels, faceModel, headModel, orbitLines]);
+  }, [thoughtModels, selectedFace, headModel, orbitLines]);
 
   return <canvas ref={canvasRef} className="threejs-canvas" />;
 };

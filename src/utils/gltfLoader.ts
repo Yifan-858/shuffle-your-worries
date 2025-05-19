@@ -1,6 +1,5 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-// import type { Thought } from "../components/Thought";
 import * as THREE from "three";
 
 export const gltfLoader = async (

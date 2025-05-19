@@ -21,8 +21,10 @@ type AppState = {
 
   faceModels: THREE.Object3D[];
   setFaceModels: (models: THREE.Object3D[]) => void;
-
+  loadAndStoreFaceModels: () => Promise<void>;
   selectedFace?: THREE.Object3D;
+  currentFace?: THREE.Object3D;
+  setCurrentFace: (face: THREE.Object3D | undefined) => void;
   updateFaceByThoughts: (thoughtCount: number) => void;
 };
 
@@ -33,6 +35,8 @@ const thoughtModelPool = [
   "/thought4.glb",
   "/thought5.glb",
 ];
+
+const faceModelPool = ["/face1.glb", "/face2.glb", "/face3.glb"];
 
 export const useAppStore = create<AppState>((set, get) => ({
   thoughts: [],
@@ -73,13 +77,37 @@ export const useAppStore = create<AppState>((set, get) => ({
   faceModels: [],
   setFaceModels: (models) => set({ faceModels: models }),
 
+  loadAndStoreFaceModels: async () => {
+    const loadedFaceModels: THREE.Object3D[] = [];
+
+    for (const url of faceModelPool) {
+      const [scene] = await gltfLoader(url);
+      loadedFaceModels.push(scene);
+    }
+
+    set({ faceModels: loadedFaceModels });
+
+    //set inital face experssion
+    if (loadedFaceModels[0]) {
+      set({ selectedFace: loadedFaceModels[0].clone() });
+    }
+  },
+
   selectedFace: undefined,
   updateFaceByThoughts: (count) => {
     const faceModels = get().faceModels;
-    let face: THREE.Object3D;
-    if (count <= 1) face = faceModels[0];
-    else if (count <= 5) face = faceModels[1];
-    else face = faceModels[2];
-    set({ selectedFace: face });
+
+    let faceIndex = 0;
+    if (count > 2 && count <= 5) faceIndex = 1;
+    else if (count > 5) faceIndex = 2;
+
+    const targetModel = faceModels[faceIndex];
+
+    if (!targetModel) return;
+
+    set({ selectedFace: targetModel.clone() }); // Clone to prevent shared mutation
   },
+
+  currentFace: undefined,
+  setCurrentFace: (face) => set({ currentFace: face }),
 }));
