@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { useAppStore } from "../stores/useAppStore";
 
 type CanvasProps = {
   thoughtModels?: THREE.Object3D[];
@@ -10,6 +11,7 @@ type CanvasProps = {
 
 const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const orbitLines = useAppStore((state) => state.orbitLines);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -64,6 +66,10 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
       headModel.position.set(0, -1, 0);
     }
 
+    orbitLines.forEach((line) => {
+      scene.add(line);
+    });
+
     //add face
     if (faceModel) {
       scene.add(faceModel);
@@ -73,9 +79,7 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
     const rotatingThoughts: THREE.Object3D[] = [];
     //pass thoughtList to modified gltfLoader and extract the 3D model object
     if (thoughtModels) {
-      thoughtModels.forEach((model, i) => {
-        model.position.x = Math.sin(i) * 3;
-        model.position.z = Math.cos(i) * 3;
+      thoughtModels.forEach((model) => {
         scene.add(model);
         rotatingThoughts.push(model);
       });
@@ -91,9 +95,15 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
 
     const animate = () => {
       requestAnimationFrame(animate);
-      //add self rotation to the Thoughts
-      rotatingThoughts.forEach((model) => {
-        model.rotation.y += 0.01;
+
+      rotatingThoughts.forEach((model, index) => {
+        //radius (position)
+        model.position.x = Math.sin(model.rotation.y) * (2 + index / 2);
+        model.position.z = Math.cos(model.rotation.y) * (2 + index / 2);
+        //rotating around the head
+        const radius = 2 + index / 2;
+        const angularSpeed = 0.005 / radius;
+        model.rotation.y -= angularSpeed;
       });
 
       controls.update();
@@ -107,7 +117,7 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
       window.removeEventListener("resize", onResize);
       renderer.dispose();
     };
-  }, [thoughtModels, faceModel, headModel]);
+  }, [thoughtModels, faceModel, headModel, orbitLines]);
 
   return <canvas ref={canvasRef} className="threejs-canvas" />;
 };
