@@ -12,6 +12,11 @@ type CanvasProps = {
 const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const orbitLines = useAppStore((state) => state.orbitLines);
+  const sceneRef = useRef<THREE.Scene>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+  const controlsRef = useRef<OrbitControls>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer>(null);
+  const rotatingThoughts = useRef<THREE.Object3D[]>([]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -19,6 +24,7 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
     // add scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xeee1d4);
+    sceneRef.current = scene;
 
     // add lights
     const light = new THREE.AmbientLight(0xffffff, 1);
@@ -41,6 +47,7 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
     );
     camera.position.z = 15;
     camera.position.y = -3;
+    cameraRef.current = camera;
 
     // create renderer
     const renderer = new THREE.WebGLRenderer({
@@ -52,38 +59,14 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
     renderer.setPixelRatio(maxPixelRatico);
     //initiate render size
     renderer.setSize(window.innerWidth, window.innerHeight);
+    rendererRef.current = renderer;
 
     //add (mouse) control
     const controls = new OrbitControls(camera, canvasRef.current);
     controls.enableDamping = true; //call .update () in render loop
     controls.dampingFactor = 0.1; // control mouse movement lower = smoother/slower movement
     controls.rotateSpeed = 0.5; // control mouse movement lower = drag rotation
-    //controls.target.set(0, 0, 0); // Adjust this based on models' center
-
-    //add head
-    if (headModel) {
-      scene.add(headModel);
-      headModel.position.set(0, -1, 0);
-    }
-
-    orbitLines.forEach((line) => {
-      scene.add(line);
-    });
-
-    //add face
-    if (faceModel) {
-      scene.add(faceModel);
-      faceModel.position.set(0.045, -1, 0);
-    }
-    //add thoughts
-    const rotatingThoughts: THREE.Object3D[] = [];
-    //pass thoughtList to modified gltfLoader and extract the 3D model object
-    if (thoughtModels) {
-      thoughtModels.forEach((model) => {
-        scene.add(model);
-        rotatingThoughts.push(model);
-      });
-    }
+    controlsRef.current = controls;
 
     //window event, spare the resizing being called every frame
     const onResize = () => {
@@ -96,7 +79,7 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
     const animate = () => {
       requestAnimationFrame(animate);
 
-      rotatingThoughts.forEach((model, index) => {
+      rotatingThoughts.current.forEach((model, index) => {
         //radius (position)
         model.position.x = Math.sin(model.rotation.y) * (2 + index / 2);
         model.position.z = Math.cos(model.rotation.y) * (2 + index / 2);
@@ -117,6 +100,40 @@ const Canvas = ({ thoughtModels, faceModel, headModel }: CanvasProps) => {
       window.removeEventListener("resize", onResize);
       renderer.dispose();
     };
+  }, []);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+
+    // Clean thoughts
+    rotatingThoughts.current.forEach((model) => scene.remove(model));
+    rotatingThoughts.current = [];
+
+    //add head
+    if (headModel) {
+      scene.add(headModel);
+      headModel.position.set(0, -1, 0);
+    }
+
+    orbitLines.forEach((line) => {
+      scene.add(line);
+    });
+
+    //add face
+    if (faceModel) {
+      scene.add(faceModel);
+      faceModel.position.set(0.045, -1, 0);
+    }
+    //add thoughts
+
+    //pass thoughtList to modified gltfLoader and extract the 3D model object
+    if (thoughtModels) {
+      thoughtModels.forEach((model) => {
+        scene.add(model);
+        rotatingThoughts.current.push(model);
+      });
+    }
   }, [thoughtModels, faceModel, headModel, orbitLines]);
 
   return <canvas ref={canvasRef} className="threejs-canvas" />;

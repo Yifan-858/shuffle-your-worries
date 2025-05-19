@@ -35,9 +35,7 @@ function App() {
 
     addThoughtFromInput(input.trim());
     setInput("");
-    console.log(thoughtModels.length);
   };
-  console.log(thoughtModels.length);
 
   return (
     <>
