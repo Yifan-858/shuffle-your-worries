@@ -81,8 +81,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const loadedFaceModels: THREE.Object3D[] = [];
 
     for (const url of faceModelPool) {
-      const [scene] = await gltfLoader(url);
-      loadedFaceModels.push(scene);
+      const [model] = await gltfLoader(url);
+      loadedFaceModels.push(model);
     }
 
     set({ faceModels: loadedFaceModels });

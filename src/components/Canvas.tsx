@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { useAppStore } from "../stores/useAppStore";
+import { backgroundColor } from "../theme";
 
 type CanvasProps = {
   headModel?: THREE.Object3D;
@@ -26,7 +27,7 @@ const Canvas = ({ headModel }: CanvasProps) => {
 
     // add scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xeee1d4);
+    scene.background = new THREE.Color(backgroundColor);
     sceneRef.current = scene;
 
     // add lights

@@ -1,5 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
+export const backgroundColor = "#EEE1D4";
+
 export const theme = createTheme({
   palette: {
     primary: {
@@ -7,6 +9,9 @@ export const theme = createTheme({
     },
     secondary: {
       main: "#97dff7",
+    },
+    background: {
+      default: backgroundColor,
     },
   },
   shape: {
