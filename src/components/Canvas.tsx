@@ -128,7 +128,7 @@ const Canvas = ({ headModel }: CanvasProps) => {
         model.position.z = Math.cos(model.rotation.y) * (2 + index / 2);
         //rotating around the head
         const radius = 2 + index / 2;
-        const angularSpeed = 0.0045 / radius;
+        const angularSpeed = 0.004 / radius;
 
         if (shouldRotateRef.current) {
           model.rotation.y -= angularSpeed;
@@ -219,14 +219,14 @@ const Canvas = ({ headModel }: CanvasProps) => {
 
   //test with escape key
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        handleZoomOut();
-        setShouldRotate(true);
-      }
+    const handleKey = (e: MouseEvent) => {
+      e.preventDefault();
+
+      handleZoomOut();
+      setShouldRotate(true);
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    window.addEventListener("dblclick", handleKey);
+    return () => window.removeEventListener("dblclick", handleKey);
   }, [handleZoomOut, setShouldRotate]);
 
   return <canvas ref={canvasRef} className="threejs-canvas" />;

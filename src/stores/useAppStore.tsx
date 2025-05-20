@@ -114,7 +114,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     if (!targetModel) return;
 
-    set({ selectedFace: targetModel.clone() }); // Clone to prevent shared mutation
+    set({ selectedFace: targetModel.clone() }); // clone to prevent shared mutation
   },
 
   currentFace: undefined,
