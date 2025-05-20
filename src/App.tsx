@@ -5,9 +5,10 @@ import { gltfLoader } from "./utils/gltfLoader.js";
 import Canvas from "./components/Canvas";
 import InputForm from "./components/UI/InputForm.js";
 import LoadingScreen from "./components/UI/LoadingScreen.js";
+import ThoughtPanel from "./components/UI/ThoughtPanel.js";
 
 function App() {
-  const { loadAndStoreFaceModels } = useAppStore();
+  const { loadAndStoreFaceModels, shouldRotate } = useAppStore();
   const [headModel, setHeadModel] = useState<THREE.Object3D>();
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +35,7 @@ function App() {
         <div>
           {headModel && <Canvas headModel={headModel} />}
           <InputForm />
+          {!shouldRotate && <ThoughtPanel />}
         </div>
       )}
     </>

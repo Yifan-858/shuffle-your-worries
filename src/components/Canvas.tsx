@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { useAppStore } from "../stores/useAppStore";
 import { backgroundColor } from "../theme";
+import { zoomInToModel, zoomOutToDefault } from "../utils/zoomHandler";
+import { thoughtClickHandler } from "../utils/thoughtClickHandler";
 
 type CanvasProps = {
   headModel?: THREE.Object3D;
@@ -16,11 +18,44 @@ const Canvas = ({ headModel }: CanvasProps) => {
   const rendererRef = useRef<THREE.WebGLRenderer>(null);
   const rotatingThoughts = useRef<THREE.Object3D[]>([]);
 
+  const initialCameraPosition = useRef<THREE.Vector3>(null);
+  const initialTarget = useRef<THREE.Vector3>(null);
+
   const thoughtModels = useAppStore((state) => state.thoughtModels);
   const orbitLines = useAppStore((state) => state.orbitLines);
   const selectedFace = useAppStore((state) => state.selectedFace);
   const currentFace = useAppStore((state) => state.currentFace);
   const setCurrentFace = useAppStore((state) => state.setCurrentFace);
+  const selectedThoughtModel = useAppStore(
+    (state) => state.selectedThoughtModel
+  );
+  const clearSelectedThought = useAppStore(
+    (state) => state.clearSelectedThought
+  );
+  const shouldRotate = useAppStore((state) => state.shouldRotate);
+  const setShouldRotate = useAppStore((state) => state.setShouldRotate);
+  const shouldRotateRef = useRef(true);
+
+  const handleZoomOut = useCallback(() => {
+    if (
+      cameraRef.current &&
+      controlsRef.current &&
+      initialCameraPosition.current &&
+      initialTarget.current
+    ) {
+      zoomOutToDefault(
+        cameraRef.current,
+        controlsRef.current,
+        initialCameraPosition.current,
+        initialTarget.current
+      );
+      clearSelectedThought();
+    }
+  }, [clearSelectedThought]);
+
+  useEffect(() => {
+    shouldRotateRef.current = shouldRotate;
+  }, [shouldRotate]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -52,6 +87,17 @@ const Canvas = ({ headModel }: CanvasProps) => {
     camera.position.z = 15;
     camera.position.y = -3;
     cameraRef.current = camera;
+    //store the camera initial position
+    initialCameraPosition.current = camera.position.clone();
+
+    //add (mouse) control
+    const controls = new OrbitControls(camera, canvasRef.current);
+    controls.enableDamping = true; //call .update () in render loop
+    controls.dampingFactor = 0.1; // control mouse movement lower = smoother/slower movement
+    controls.rotateSpeed = 0.5; // control mouse movement lower = drag rotation
+    controlsRef.current = controls;
+    //store the camera initial target
+    initialTarget.current = controls.target.clone();
 
     // create renderer
     const renderer = new THREE.WebGLRenderer({
@@ -64,13 +110,6 @@ const Canvas = ({ headModel }: CanvasProps) => {
     //initiate render size
     renderer.setSize(window.innerWidth, window.innerHeight);
     rendererRef.current = renderer;
-
-    //add (mouse) control
-    const controls = new OrbitControls(camera, canvasRef.current);
-    controls.enableDamping = true; //call .update () in render loop
-    controls.dampingFactor = 0.1; // control mouse movement lower = smoother/slower movement
-    controls.rotateSpeed = 0.5; // control mouse movement lower = drag rotation
-    controlsRef.current = controls;
 
     //window event, spare the resizing being called every frame
     const onResize = () => {
@@ -89,8 +128,11 @@ const Canvas = ({ headModel }: CanvasProps) => {
         model.position.z = Math.cos(model.rotation.y) * (2 + index / 2);
         //rotating around the head
         const radius = 2 + index / 2;
-        const angularSpeed = 0.005 / radius;
-        model.rotation.y -= angularSpeed;
+        const angularSpeed = 0.0045 / radius;
+
+        if (shouldRotateRef.current) {
+          model.rotation.y -= angularSpeed;
+        }
       });
 
       controls.update();
@@ -108,7 +150,10 @@ const Canvas = ({ headModel }: CanvasProps) => {
 
   useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene) return;
+    const canvas = canvasRef.current;
+    const camera = cameraRef.current;
+
+    if (!scene || !canvas || !camera) return;
 
     // Clean thoughts
     rotatingThoughts.current.forEach((model) => scene.remove(model));
@@ -124,7 +169,7 @@ const Canvas = ({ headModel }: CanvasProps) => {
       scene.add(line);
     });
 
-    //add face
+    //add selected face
     if (selectedFace) {
       if (!currentFace || currentFace.uuid !== selectedFace.uuid) {
         // remove old face if it exists
@@ -138,7 +183,6 @@ const Canvas = ({ headModel }: CanvasProps) => {
         setCurrentFace(newFace);
       }
     }
-    //add thoughts
 
     //pass thoughtList to modified gltfLoader and extract the 3D model object
     if (thoughtModels) {
@@ -147,7 +191,43 @@ const Canvas = ({ headModel }: CanvasProps) => {
         rotatingThoughts.current.push(model);
       });
     }
+
+    const handleClick = thoughtClickHandler(
+      camera,
+      canvas,
+      rotatingThoughts.current
+    );
+    canvas.addEventListener("click", handleClick);
+
+    return () => {
+      canvas.removeEventListener("click", handleClick);
+    };
   }, [thoughtModels, selectedFace, headModel, orbitLines]);
+
+  //track the selected thought
+  useEffect(() => {
+    if (selectedThoughtModel && cameraRef.current && controlsRef.current) {
+      zoomInToModel(
+        cameraRef.current,
+        controlsRef.current,
+        selectedThoughtModel
+      );
+      //stop rotating when zoomed in
+      setShouldRotate(false);
+    }
+  }, [selectedThoughtModel, setShouldRotate]);
+
+  //test with escape key
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleZoomOut();
+        setShouldRotate(true);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [handleZoomOut, setShouldRotate]);
 
   return <canvas ref={canvasRef} className="threejs-canvas" />;
 };

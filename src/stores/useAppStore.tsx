@@ -26,6 +26,15 @@ type AppState = {
   currentFace?: THREE.Object3D;
   setCurrentFace: (face: THREE.Object3D | undefined) => void;
   updateFaceByThoughts: (thoughtCount: number) => void;
+
+  selectedThoughtModel?: THREE.Object3D;
+  selectedThoughtData?: Thought;
+
+  setSelectedThought: (model: THREE.Object3D, data: Thought) => void;
+  clearSelectedThought: () => void;
+
+  shouldRotate: boolean;
+  setShouldRotate: (value: boolean) => void;
 };
 
 const thoughtModelPool = [
@@ -110,4 +119,19 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   currentFace: undefined,
   setCurrentFace: (face) => set({ currentFace: face }),
+
+  setSelectedThought: (model, data) =>
+    set({
+      selectedThoughtModel: model,
+      selectedThoughtData: data,
+    }),
+
+  clearSelectedThought: () =>
+    set({
+      selectedThoughtModel: undefined,
+      selectedThoughtData: undefined,
+    }),
+
+  shouldRotate: true,
+  setShouldRotate: (value: boolean) => set({ shouldRotate: value }),
 }));
