@@ -49,6 +49,16 @@ const ThoughtPanel = () => {
               ? selectedThoughtData.description
               : "No infomation"}
           </Typography>
+          <Typography
+            sx={{
+              mt: 2,
+              userSelect: "none",
+              fontSize: "0.8rem",
+              color: (theme) => theme.palette.primary.main,
+            }}
+          >
+            Double click to exit
+          </Typography>
         </Paper>
       </motion.div>
     </Box>
