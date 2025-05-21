@@ -54,7 +54,12 @@ const ThoughtPanel = () => {
               mt: 2,
               userSelect: "none",
               fontSize: "0.8rem",
-              color: (theme) => theme.palette.primary.main,
+              textAlign: "center",
+              color: "primary.main",
+              background: "#ffffff6d",
+              marginTop: "3rem",
+              border: "solid 1px #ffffff64",
+              borderRadius: "10px",
             }}
           >
             Double click to exit
