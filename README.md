@@ -24,6 +24,14 @@ All models are created in Blender, my favorite tool—like the spiky or slimy th
     <img src="https://skillicons.dev/icons?i=react,typescript,threejs,blender" />
 </a>
 
+## NEW FEATURE
+
+Click the blobs for extra interaction!
+
+<div align="center">
+  <img src="media/new-feature.gif" alt="preview" width="100%" />
+</div>
+
 ### Process
 
 <div align="center">
