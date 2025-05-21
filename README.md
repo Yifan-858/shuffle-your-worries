@@ -40,5 +40,5 @@ Click the blobs for extra interaction!
 
 ## Future Improvement
 
-1. Attach an information board to each "worry blob" to store the details (user data, full-stack)
-2. Add more "worry blob" with different texture and shape
+1. Add backend to register each "worry blob"(user data, full-stack)
+2. Randomize the "worry blob" with different texture and shape
